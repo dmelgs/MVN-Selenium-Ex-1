@@ -11,12 +11,13 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class LoginTestCase {
 
-	public static String browser = "chrome"; // browser config
+	public static String browser = "chrome"; // browser configuration
 	public static WebDriver driver;
 
 	public static void main(String[] args) {
-		String email = "melgo.agency@gmail.com";
-		String pass = "123456";
+		String email = "standard_user";
+		String pass = "secret_sauce";
+		String url = "https://www.saucedemo.com/";
 		if (browser.equals("chrome")) {
 			WebDriverManager.chromedriver().setup();
 			driver = new ChromeDriver();
@@ -25,16 +26,16 @@ public class LoginTestCase {
 			driver = new EdgeDriver();
 		}
 		try {
-			driver.get("https://capstone-fantasea.web.app/?#/login");
+			driver.get(url);
 			driver.manage().window().maximize();
 			
-			WebElement inputEmail = driver.findElement(By.xpath("//input[@placeholder='Email']"));
+			WebElement inputEmail = driver.findElement(By.xpath("//input[@placeholder='Username']"));
 			inputEmail.sendKeys(email);
 			
-			WebElement inputPass = driver.findElement(By.xpath("//input[@placeholder='Password']"));
+			WebElement inputPass = driver.findElement(By.xpath("//input[@name='password']"));
 			inputPass.sendKeys(pass);
 			
-			driver.findElement(By.xpath("//button[text()='Login']")).click();
+			driver.findElement(By.xpath("//input[@type='submit']")).click();
 			
 		} finally {
 			System.out.print("Success");	
