@@ -15,9 +15,11 @@ public class LoginTestCase {
 	public static WebDriver driver;
 
 	public static void main(String[] args) {
+		
 		String email = "standard_user";
 		String pass = "secret_sauce";
 		String url = "https://www.saucedemo.com/";
+		
 		if (browser.equals("chrome")) {
 			WebDriverManager.chromedriver().setup();
 			driver = new ChromeDriver();
