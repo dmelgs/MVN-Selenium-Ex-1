@@ -1,7 +1,15 @@
 package nvmSelenium;
 
 import java.io.*;
+import java.time.Duration;
+
 import org.apache.poi.xssf.usermodel.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.Assert;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class ParameterizeTestingExcel {
 	private XSSFSheet ExcelWSheet;
@@ -44,16 +52,38 @@ public class ParameterizeTestingExcel {
 		}
 	}
 
+	public static WebDriver driver;
+
 	public static void main(String[] args) throws Exception {
-		ParameterizeTestingExcel parExc =
-				new ParameterizeTestingExcel("C:\\Users\\acer\\OneDrive - United Electronics Co. (EXTRA)\\Desktop\\UserCredentials.xlsx", "Sheet1");	
-		 System.out.println("The Row count is " + parExc.excel_get_rows());
-		 int rows = parExc.excel_get_rows();
-		 for(int i = 1 ; i < rows; i++) {
-			 parExc.getCellDataasstring(i, 0);
-		 }
-		 
-		 
+		ParameterizeTestingExcel parExc = new ParameterizeTestingExcel(
+				"C:\\Users\\acer\\OneDrive - United Electronics Co. (EXTRA)\\Desktop\\UserCredentials.xlsx", "Sheet1");
+		System.out.println("The Row count is " + parExc.excel_get_rows());
+		WebDriverManager.firefoxdriver().setup();
+		driver = new FirefoxDriver();
+		int rows = parExc.excel_get_rows();
+
+		for (int i = 1; i < rows; i++) {
+			
+			try {
+				driver.get(util.BASE_URL);
+				driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+				driver.manage().window().maximize();
+
+				driver.findElement(By.xpath("//input[@name='uid']")).sendKeys(parExc.getCellDataasstring(i, 0));
+
+				driver.findElement(By.xpath("//input[@name='password']")).sendKeys(parExc.getCellDataasstring(i, 1));
+
+				driver.findElement(By.xpath("//input[@value='LOGIN']")).click();
+				
+				String actualtitle = driver.getTitle();
+				Assert.assertEquals(util.EXPECT_TITLE, actualtitle);
+
+			}
+			finally{
+				System.out.print("Test Case Successfull" + i + "=");				
+			}
+		}
+
 	}
 
 }
