@@ -2,9 +2,11 @@ package nvmSelenium;
 
 import java.time.Duration;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.Assert;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -35,6 +37,7 @@ public class DemoGuru_LoginTest {
 			driver.findElement(By.xpath("//input[@name='password']")).sendKeys(util.PASSWD);
 			
 			driver.findElement(By.xpath("//input[@value='LOGIN']")).click();	
+			
 			
 			String actualtitle = driver.getTitle();
 			Assert.assertEquals(util.EXPECT_TITLE, actualtitle);

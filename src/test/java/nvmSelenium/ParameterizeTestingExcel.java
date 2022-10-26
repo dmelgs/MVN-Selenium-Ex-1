@@ -4,9 +4,14 @@ import java.io.*;
 import java.time.Duration;
 
 import org.apache.poi.xssf.usermodel.*;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -45,7 +50,6 @@ public class ParameterizeTestingExcel {
 
 		try {
 			String CellData = ExcelWSheet.getRow(RowNum).getCell(ColNum).getStringCellValue();
-			System.out.println("The value of CellData " + CellData);
 			return CellData;
 		} catch (Exception e) {
 			return "Errors in Getting Cell Data";
@@ -53,36 +57,51 @@ public class ParameterizeTestingExcel {
 	}
 
 	public static WebDriver driver;
+	public static WebDriverWait wait;
 
 	public static void main(String[] args) throws Exception {
 		ParameterizeTestingExcel parExc = new ParameterizeTestingExcel(
 				"C:\\Users\\acer\\OneDrive - United Electronics Co. (EXTRA)\\Desktop\\UserCredentials.xlsx", "Sheet1");
 		System.out.println("The Row count is " + parExc.excel_get_rows());
 		WebDriverManager.firefoxdriver().setup();
+
 		driver = new FirefoxDriver();
+		wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+		boolean isGood = false;
 		int rows = parExc.excel_get_rows();
 
 		for (int i = 1; i < rows; i++) {
-			
+			driver.get(util.BASE_URL);
+			driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+			driver.manage().window().maximize();
+
+			WebElement user = driver.findElement(By.xpath("//input[@name='uid']"));
+			user.sendKeys(parExc.getCellDataasstring(i, 0));
+			WebElement pass = driver.findElement(By.xpath("//input[@name='password']"));
+			pass.sendKeys(parExc.getCellDataasstring(i, 1));
+			driver.findElement(By.xpath("//input[@value='LOGIN']")).click();
 			try {
-				driver.get(util.BASE_URL);
-				driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
-				driver.manage().window().maximize();
+				Alert alt = driver.switchTo().alert();
+				String actualBoxtitle = alt.getText(); // get content of the Alter Message
+				alt.accept();
+				if (actualBoxtitle.contains(util.EXPECT_ERROR)) { // Compare Error Text with Expected Error Value
+					System.out.println("Test case SS[" + i + "]: Passed W/ Incorrect Credentials");
+				} else {
+					System.out.println("Test case SS[" + i + "]: Failed");
+				}
 
-				driver.findElement(By.xpath("//input[@name='uid']")).sendKeys(parExc.getCellDataasstring(i, 0));
-
-				driver.findElement(By.xpath("//input[@name='password']")).sendKeys(parExc.getCellDataasstring(i, 1));
-
-				driver.findElement(By.xpath("//input[@value='LOGIN']")).click();
-				
-				String actualtitle = driver.getTitle();
-				Assert.assertEquals(util.EXPECT_TITLE, actualtitle);
-
+			} catch (NoAlertPresentException Ex) {
+				String actualTitle = driver.getTitle();
+				// On Successful login compare Actual Page Title with Expected Title
+				if (actualTitle.contains(util.EXPECT_TITLE)) {
+					System.out.println("Test case SS[" + i + "]: Passed W/ Correct Credentials");
+				} else {
+					System.out.println("Test case SS[" + i + "]: Failed");
+				}
 			}
-			finally{
-				System.out.print("Test Case Successfull" + i + "=");				
-			}
+			
 		}
+		driver.close();
 
 	}
 
